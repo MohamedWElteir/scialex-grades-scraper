@@ -45,8 +45,8 @@ Before you begin, ensure you have met the following requirements:
 1. **Clone the Repository**
 
    ```shell
-   git clone https://github.com/MohamedWElteir/scialex-results-scraper.git
-   cd scialex-results-scraper
+   git clone https://github.com/MohamedWElteir/scialex-grades-scraper.git
+   cd scialex-grades-scraper
    ```
 2. **Build the project**
 
@@ -89,7 +89,7 @@ WebDriver driver = new ChromeDriver();
 
 1. **Navigate to the project's directory**
 ```bash
-cd scialex-results-scraper
+cd scialex-grades-scraper
 ```
 2. **Run the application**
 - You can run the application using Maven:
@@ -99,13 +99,13 @@ cd scialex-results-scraper
 - Or, if you prefer using the compiled JAR:
 
 ```bash
-java -jar target/scialex-results-scraper-1.0-SNAPSHOT.jar
+java -jar target/scialex-grades-scraper-1.0-SNAPSHOT.jar
 ```
 
 ## Project Structure
 
 ```html
-scialex-results-scraper/
+scialex-grades-scraper/
 ├── src/
 │   ├── main/
 │   │   ├── java/
