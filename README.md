@@ -60,6 +60,7 @@ Before you begin, ensure you have met the following requirements:
 ```dotenv
 LOGIN_USERNAME=your_username
 LOGIN_PASSWORD=your_password
+LABEL="ContentPlaceHolder1_ContentPlaceHolder1_DataList1"
 ```
 
 ## Configuration
