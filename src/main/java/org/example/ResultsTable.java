@@ -4,12 +4,12 @@ import java.util.List;
 
 public class ResultsTable {
 
-    private final String tableLabel;
+     final String tableLabel;
     List<ResultsRow> rows;
-    private final double semesterGPA;
-    private final double cgpa;
-    private final int semesterLoad;
-    private final int totalHours;
+     final double semesterGPA;
+     final double cgpa;
+     final int semesterLoad;
+     final int totalHours;
 
     public ResultsTable(String tableLabel, List<ResultsRow> rows, double semesterGPA, double cgpa, int semesterLoad, int totalHours) {
         this.tableLabel = tableLabel;

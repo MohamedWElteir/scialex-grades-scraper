@@ -1,13 +1,13 @@
 package org.example;
 
 public class ResultsRow {
-    private final String courseNumber;
-    private final String courseCode;
-    private final String courseName;
-    private final String grade;
-    private final double points;
-    private final int hours;
-    private final double pointsTimesHours;
+     final String courseNumber;
+     final String courseCode;
+     final String courseName;
+     final String grade;
+     final double points;
+     final int hours;
+     final double pointsTimesHours;
 
     public ResultsRow(String courseNumber, String previousCourseCode, String courseName, String grade, double points, int hours, double pointsTimesHours) {
         this.courseNumber = courseNumber;

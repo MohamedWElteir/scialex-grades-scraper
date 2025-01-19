@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 import static java.lang.Double.parseDouble;
 
 public class Main {
-    static int unmatchedCount =0,matchedCount=0,totalHours;
+    static int unmatchedCount =0,matchedCount=0,totalHours,pending=0;
     static double totalCGPA;
     public static void main(String[] args){
         File file = new File("src/main/resources/output");
@@ -53,15 +53,15 @@ public class Main {
 
             for (int counter = 0; counter < numberOfTables; counter++) {
                 coursesRows = new ArrayList<>();
-                String[] collected = driver.findElement(By.id("ContentPlaceHolder1_ContentPlaceHolder1_DataList1_GridView1_" + counter))
+                String[] collected = driver.findElement(By.id(dotenv.get("LABEL")+ "_GridView1_" + counter))
                         .getText()
                         .split("\n");
-                String tableLabel = driver.findElement(By.id("ContentPlaceHolder1_ContentPlaceHolder1_DataList1_SemesterNameLabel_" + counter)).getText();
-                double semesterGPA = Double.parseDouble(driver.findElement(By.id("ContentPlaceHolder1_ContentPlaceHolder1_DataList1_FormView1_" + counter + "_GPALabel")).getText());
-                double cgpa = Double.parseDouble(driver.findElement(By.id("ContentPlaceHolder1_ContentPlaceHolder1_DataList1_FormView1_" + counter + "_CGPALabel")).getText());
-                int semesterLoad = Integer.parseInt(driver.findElement(By.id("ContentPlaceHolder1_ContentPlaceHolder1_DataList1_FormView1_" + counter + "_SemesterLoadLabel")).getText());
-                int totalHoursLeft = Integer.parseInt(driver.findElement(By.id("ContentPlaceHolder1_ContentPlaceHolder1_DataList1_FormView1_" + counter + "_SemesterCHLabel")).getText());
-                int totalHoursRight = Integer.parseInt(driver.findElement(By.id("ContentPlaceHolder1_ContentPlaceHolder1_DataList1_FormView1_" + counter + "_SemesterSUCHLabe")).getText());
+                String tableLabel = driver.findElement(By.id(dotenv.get("LABEL") + "_SemesterNameLabel_" + counter)).getText();
+                double semesterGPA = Double.parseDouble(driver.findElement(By.id(dotenv.get("LABEL") + "_FormView1_" + counter + "_GPALabel")).getText());
+                double cgpa = Double.parseDouble(driver.findElement(By.id(dotenv.get("LABEL") + "_FormView1_" + counter + "_CGPALabel")).getText());
+                int semesterLoad = Integer.parseInt(driver.findElement(By.id(dotenv.get("LABEL") + "_FormView1_" + counter + "_SemesterLoadLabel")).getText());
+                int totalHoursLeft = Integer.parseInt(driver.findElement(By.id(dotenv.get("LABEL") + "_FormView1_" + counter + "_SemesterCHLabel")).getText());
+                int totalHoursRight = Integer.parseInt(driver.findElement(By.id(dotenv.get("LABEL") + "_FormView1_" + counter + "_SemesterSUCHLabe")).getText());
                 int termHours = totalHoursLeft + totalHoursRight;
                 totalHours += termHours;
                 if(counter == numberOfTables - 1){
@@ -70,18 +70,14 @@ public class Main {
                 for (int i = 7; i < collected.length; i++) {
                     String record = collected[i];
                     ResultsRow parsedRow = parseRecord(record);
-                    if (parsedRow != null) {
-                        coursesRows.add(parsedRow);
-                    }
-
+                    if (parsedRow != null)  coursesRows.add(parsedRow);
+                    if(parsedRow != null && parsedRow.grade.equals("P")) pending++;
                 }
                 tables.add(new ResultsTable(tableLabel, coursesRows, semesterGPA, cgpa, semesterLoad, termHours));
 
             }
 
-//            for (ResultsRow row : parsedResults) {
-//                System.out.println(row);
-//            }
+
             FileWriter writer = new FileWriter(file);
             for (ResultsTable table : tables) {
                 if(file.canWrite()){
@@ -97,6 +93,7 @@ public class Main {
             driver.quit();
             System.out.println("CGPA: "+ totalCGPA + "\nTotal Credit Hours: " + totalHours);
             System.out.println("Matched: " + matchedCount + " rows.");
+            System.out.println("Pending grades: " + pending);
             System.err.println("Unmatched: " + unmatchedCount + " rows.");
         }
 
