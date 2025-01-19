@@ -37,6 +37,7 @@ Before you begin, ensure you have met the following requirements:
 - **Environment Variables**:
     - `LOGIN_USERNAME`: Your scialex portal username.
     - `LOGIN_PASSWORD`: Your scialex portal password.
+    - `LABEL`: The HTML label tag (it is included in the .env section).
 - **Internet Connection**: Required for Selenium WebDriver to access the scialex website.
 - **Edge Browser**: Ensure Microsoft Edge is installed, as the project uses the EdgeDriver. [Download Edge](https://www.microsoft.com/edge)
 
