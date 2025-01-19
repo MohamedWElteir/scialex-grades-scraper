@@ -3,6 +3,7 @@ package org.example;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -11,6 +12,7 @@ import io.github.cdimascio.dotenv.Dotenv;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
@@ -18,16 +20,17 @@ import java.util.regex.Pattern;
 
 import static java.lang.Double.parseDouble;
 
+
 public class Main {
-    static int unmatchedCount =0,matchedCount=0,totalHours,pending=0;
-    static double totalCGPA;
+    static ResultsProcessor resultsProcessor = new ResultsProcessor();
     public static void main(String[] args){
         File file = new File("src/main/resources/output");
+        WebDriver driver;
 
         ArrayList<ResultsTable> tables = new ArrayList<>();
         Dotenv dotenv = Dotenv.load();
         WebDriverManager.edgedriver().setup();
-        WebDriver driver = new EdgeDriver();
+        driver = new EdgeDriver();
         driver.manage().window().maximize();
         try{
             driver.get("https://www.scialex.org/");
@@ -63,15 +66,15 @@ public class Main {
                 int totalHoursLeft = Integer.parseInt(driver.findElement(By.id(dotenv.get("LABEL") + "_FormView1_" + counter + "_SemesterCHLabel")).getText());
                 int totalHoursRight = Integer.parseInt(driver.findElement(By.id(dotenv.get("LABEL") + "_FormView1_" + counter + "_SemesterSUCHLabe")).getText());
                 int termHours = totalHoursLeft + totalHoursRight;
-                totalHours += termHours;
+                resultsProcessor.addHours(termHours);
                 if(counter == numberOfTables - 1){
-                    totalCGPA = cgpa;
+                    resultsProcessor.setTotalCGPA(cgpa);
                 }
                 for (int i = 7; i < collected.length; i++) {
                     String record = collected[i];
                     ResultsRow parsedRow = parseRecord(record);
                     if (parsedRow != null)  coursesRows.add(parsedRow);
-                    if(parsedRow != null && parsedRow.grade.equals("P")) pending++;
+                    if(parsedRow != null && parsedRow.grade.equals("P")) resultsProcessor.incrementPendingCourses();
                 }
                 tables.add(new ResultsTable(tableLabel, coursesRows, semesterGPA, cgpa, semesterLoad, termHours));
 
@@ -87,14 +90,19 @@ public class Main {
             }
             writer.close();
 
-        }catch (Exception e){
-            System.err.println("An error occurred: " + e.getMessage());
-        }finally {
+        } catch (IOException e) {
+            System.err.println("File error: " + e.getMessage());
+        } catch (WebDriverException e) {
+            System.err.println("WebDriver error: " + e.getMessage());
+        } catch (InterruptedException e) {
+            System.err.println("Thread sleep interrupted: " + e.getMessage());
+            Thread.currentThread().interrupt();
+        } finally {
             driver.quit();
-            System.out.println("CGPA: "+ totalCGPA + "\nTotal Credit Hours: " + totalHours);
-            System.out.println("Matched: " + matchedCount + " rows.");
-            System.out.println("Pending grades: " + pending);
-            System.err.println("Unmatched: " + unmatchedCount + " rows.");
+            System.out.println("CGPA: " + resultsProcessor.getTotalCGPA() + "\nTotal Credit Hours: " + resultsProcessor.getTotalHours());
+            System.out.println("Matched: " + resultsProcessor.getMatchedCount() + " rows.");
+            System.out.println("Pending grades: " + resultsProcessor.getPendingCourses());
+            System.err.println("Unmatched: " + resultsProcessor.getUnmatchedCount() + " rows.");
         }
 
     }
@@ -121,7 +129,7 @@ public class Main {
                 double points = parseDouble(matcher.group(4));
                 int hours = Integer.parseInt(matcher.group(5));
                 double totalPoints = parseDouble(matcher.group(6));
-                matchedCount++;
+                resultsProcessor.incrementMatchedCount();
                 return new ResultsRow(courseCode, oldCourseCode, courseName, grade, points, hours, totalPoints);
             } catch (Exception e) {
                 System.err.println("Error parsing record: " + record + " " + e.getMessage());
@@ -140,15 +148,16 @@ public class Main {
                     double points = parseDouble(matcher2.group(5));
                     int hours = Integer.parseInt(matcher2.group(6));
                     double totalPoints = parseDouble(matcher2.group(7));
-                    matchedCount++;
+                    resultsProcessor.incrementMatchedCount();
                     return new ResultsRow(courseCode, oldCourseCode, courseName, grade, points, hours, totalPoints);
                 } catch (Exception e) {
                     System.err.println("Error parsing record with secondary regex: " + record + " " + e.getMessage());
-                    unmatchedCount++;
+                    resultsProcessor.incrementUnmatchedCount();
+
                 }
             } else {
                 System.err.println("No match found for record: " + record);
-                unmatchedCount++;
+                resultsProcessor.incrementUnmatchedCount();
             }
         }
         return null;
