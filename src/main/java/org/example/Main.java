@@ -51,7 +51,7 @@ public class Main {
             System.out.println(results_page);
             driver.get(results_page);
 
-            int numberOfTables = 9;
+            int numberOfTables = 9; // not yet dynamic. change this number to your actual tables count
             ArrayList<ResultsRow> coursesRows;
 
             for (int counter = 0; counter < numberOfTables; counter++) {
